@@ -6,6 +6,8 @@ import chalk from "chalk";
 import { displayBanner } from "./utils/banner.js";
 import { handleExit } from "./utils/exit.js";
 import { handleCommand } from "./utils/command/command.js";
+import { handleAssistance } from "./utils/assistance/assistance.js";
+import { handleEmailCommand } from "./utils/email/command.js";
 
 
 // Add SIGINT handler at the top level
@@ -44,13 +46,13 @@ async function main() {
           await handleCommand();
           break;
         case "email":
-          console.log("Email functionality coming soon!");
+          await handleEmailCommand();
           break;
         case "file":
           console.log("File management functionality coming soon!");
           break;
         case "system":
-          console.log("System assistance functionality coming soon!");
+          await handleAssistance();
           break;
         default:
           console.warn("Invalid action selected.");
