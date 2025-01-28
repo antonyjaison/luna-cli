@@ -1,11 +1,7 @@
-import { exec } from "child_process";
-import tmp from "tmp";
-import fs from "fs";
 import nodemailer from "nodemailer";
+import { user } from "./user.js";
 
 export async function executeCommand(
-    sender,
-    password,
     recipient,
     subject,
     body
@@ -13,13 +9,13 @@ export async function executeCommand(
     const transporter = nodemailer.createTransport({
         service: "gmail",
         auth: {
-            user: sender,
-            pass: password,
+            user: user.email,
+            pass: user.password,
         },
     });
 
     var mailOptions = {
-        from: sender,
+        from: user.email,
         to: recipient,
         subject: subject,
         text: body

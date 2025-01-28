@@ -12,7 +12,6 @@ const model = new ChatGoogleGenerativeAI({
     apiKey: "AIzaSyCwvqa_fsHvrDOaRm6FqmmqeckeW6mvXO0",
 });
 
-
 const promptTemplate = new PromptTemplate({
     template,
     inputVariables: ["task"],
