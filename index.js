@@ -9,7 +9,6 @@ import { handleCommand } from "./utils/command/command.js";
 import { handleAssistance } from "./utils/assistance/assistance.js";
 import { handleEmailCommand } from "./utils/email/command.js";
 
-
 // Add SIGINT handler at the top level
 process.on("SIGINT", handleExit);
 

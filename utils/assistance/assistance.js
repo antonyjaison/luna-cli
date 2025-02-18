@@ -4,6 +4,9 @@ import { template } from "./prompt.js";
 import inquirer from "inquirer";
 import chalk from "chalk";
 import markdownToCli from "cli-markdown"
+import { createSpinner } from "nanospinner";
+
+const spinner = createSpinner();
 
 const model = new ChatGoogleGenerativeAI({
     model: "gemini-1.5-flash-8b",
@@ -19,9 +22,11 @@ const promptTemplate = new PromptTemplate({
 
 export async function generateAssjstanceText(task) {
     try {
+        spinner.start({ text: "Generating assistance..." });
         const formattedPrompt = await promptTemplate.format({ task });
         const res = await model.invoke([["human", formattedPrompt]]);
         const cleanedContent = res.content.replace(/<think>.*?<\/think>/, "");
+        spinner.success({ text: "Assistance generated" });
         return cleanedContent;
     } catch (error) {
         console.error(chalk.red("Error generating command:"), error);

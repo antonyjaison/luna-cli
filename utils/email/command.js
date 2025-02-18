@@ -6,6 +6,9 @@ import chalk from "chalk";
 import { executeCommand } from "./executeCommand.js";
 import { user } from "./user.js";
 import markdownToCli from "cli-markdown";
+import { createSpinner } from "nanospinner";
+
+const spinner = createSpinner();
 
 const model = new ChatGoogleGenerativeAI({
     model: "gemini-1.5-flash-8b",
@@ -21,6 +24,7 @@ const promptEmailTemplate = new PromptTemplate({
 
 export async function generateEmailCommand(task) {
     try {
+        spinner.start({ text: "Generating email..." });
         const formattedPromptSub = await promptEmailTemplate.format({
             task,
             sender_name: user.name
@@ -31,17 +35,21 @@ export async function generateEmailCommand(task) {
             .replace(/```/g, "")
             .trim();
 
+        spinner.success({ text: "Email generated" });
+
         try {
-            const emailData = JSON.parse(cleanedContent); // Parse the JSON string
+            spinner.start({ text: "Parsing email content..." });
+            const emailData = JSON.parse(cleanedContent); 
+            spinner.success({ text: "Email content parsed" });
             return emailData
         } catch (error) {
-            console.error(chalk.red("Error parsing email content as JSON:"), error);
+            spinner.error({ text: "Failed to parse email content" });
             return "Failed to generate email command. Invalid JSON format.";
         }
 
     } catch (error) {
-        console.error(chalk.red("Error generating email command:"), error);
-        return "Failed to generate email command. Please try again.";
+        console.error(chalk.red("Error generating email:"), error);
+        return "Failed to generate email. Please try again.";
     }
 }
 
@@ -56,6 +64,7 @@ export async function handleEmailCommand() {
     ]);
 
     const command = await generateEmailCommand(task);
+    console.log(command)
     console.log(chalk.green("\nGenerated email content:"));
     console.log(chalk.yellow(`Subject: ${command.subject}`));
     console.log(markdownToCli(command.body));
@@ -69,7 +78,7 @@ export async function handleEmailCommand() {
         },
     ]);
 
-    const { recipient_email } = await inquirer.prompt([
+    const { recipientEmail } = await inquirer.prompt([
         {
             type: "input",
             name: "recipientEmail",
@@ -82,10 +91,13 @@ export async function handleEmailCommand() {
 
     if (shouldExecute) {
         try {
-            const output = await executeCommand(recipient_email, command.subject, command.body);
+            spinner.start({ text: "Executing email command..." });
+            const output = await executeCommand(recipientEmail, command.subject, command.body);
+            spinner.success({ text: "Email command executed successfully" });
             console.log(chalk.green("Email command executed successfully:"));
             console.log(output);
         } catch (error) {
+            spinner.error({ text: "Failed to execute email command" });
             console.error(chalk.red(`Error executing email command: ${error.message}`));
         }
     } else {

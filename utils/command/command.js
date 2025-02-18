@@ -4,6 +4,9 @@ import { template } from "./prompt.js";
 import inquirer from "inquirer";
 import chalk from "chalk";
 import { executeCommand, executeScript } from "./executeCommand.js";
+import { createSpinner } from "nanospinner";
+
+const spinner = createSpinner();
 
 const model = new ChatGoogleGenerativeAI({
     model: "gemini-1.5-flash-8b",
@@ -20,11 +23,14 @@ const promptTemplate = new PromptTemplate({
 
 export async function generateCommand(task) {
     try {
+        spinner.start({ text: "Generating command..." });
         const formattedPrompt = await promptTemplate.format({ task });
         const res = await model.invoke([["human", formattedPrompt]]);
         const cleanedContent = res.content.replace(/<think>.*?<\/think>/, "");
+        spinner.success({ text: "Command generated" });
         return cleanedContent;
     } catch (error) {
+        spinner.error({ text: "Failed to generate command" });
         console.error(chalk.red("Error generating command:"), error);
         return "Failed to generate command. Please try again.";
     }
@@ -58,17 +64,19 @@ export async function handleCommand() {
         try {
             if (command.includes("\n") || command.startsWith("#!")) {
                 // If the command is a script, execute it as a script
+                spinner.start({ text: "Executing script..." });
                 const output = await executeScript(command);
-                console.log(chalk.green("Script executed successfully:"));
+                spinner.success({ text: "Script executed successfully" });
                 console.log(output);
             } else {
                 // If the command is a single command, execute it directly
+                spinner.start({ text: "Executing command..." });
                 const output = await executeCommand(command);
-                console.log(chalk.green("Command executed successfully:"));
+                spinner.success({ text: "Command executed successfully" });
                 console.log(output);
             }
         } catch (error) {
-            console.error(`Error executing command: ${error.message}`);
+            spinner.error({ text: "Failed to execute command" });
         }
     } else {
         console.info("Command execution cancelled.");
